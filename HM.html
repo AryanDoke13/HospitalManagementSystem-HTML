@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🩸 Emergency Finder</title>
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+    }
+    .navbar {
+      background: #b30000;
+    }
+    .navbar a {
+      color: #fff !important;
+    }
+    .navbar a:hover {
+      color: #000 !important;
+      background: #ff3333 !important;
+    }
+    .brand {
+      font-weight: bold;
+      color: #fff;
+    }
+    .card {
+      background: #1a1a1a;
+      color: #fff;
+      border: 2px solid #b30000;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(179,0,0,0.5);
+    }
+    .btn-danger {
+      background: #b30000;
+      border: none;
+    }
+    .btn-danger:hover {
+      background: #ff1a1a;
+    }
+    .form-control, .form-select, textarea {
+      background: #111;
+      border: 1px solid #b30000;
+      color: #fff;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      padding: 10px;
+      background: #b30000;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand brand">🩸 Emergency Finder</a>
+    <button class="navbar-toggler bg-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon bg-light"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#search">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="#add">Add</a></li>
+        <li class="nav-item"><a class="nav-link" href="#requests">Requests</a></li>
+        <li class="nav-item"><a class="nav-link" href="#data">Data</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container mt-4">
+  <!-- Search Section -->
+  <section id="search" class="card">
+    <h2>🔍 Search donors & medicines</h2>
+    <form id="searchForm" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Type</label>
+        <select id="filterType" class="form-select">
+          <option value="all">All</option>
+          <option value="blood">Blood</option>
+          <option value="medicine">Medicine</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Blood group / Medicine</label>
+        <input id="filterQuery" class="form-control" type="text" placeholder="e.g. O+, Paracetamol"/>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">City</label>
+        <input id="filterCity" class="form-control" type="text" placeholder="e.g. Pune"/>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button id="btnSearch" type="submit" class="btn btn-danger w-100">Search</button>
+      </div>
+    </form>
+    <div id="results" class="mt-3"></div>
+  </section>
+
+  <!-- Add Section -->
+  <section id="add" class="card">
+    <h2>➕ Add Donor / Medicine Provider</h2>
+    <form id="addForm" class="row g-2">
+      <div class="col-md-6"><input class="form-control" type="text" id="name" placeholder="Name" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="contact" placeholder="Contact" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="item" placeholder="Blood group or Medicine" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="city" placeholder="City" required /></div>
+      <div class="col-12"><textarea class="form-control" id="notes" placeholder="Notes"></textarea></div>
+      <div class="col-md-4">
+        <select id="entryType" class="form-select">
+          <option value="blood">Blood</option>
+          <option value="medicine">Medicine</option>
+        </select>
+      </div>
+      <div class="col-md-8"><button type="submit" class="btn btn-danger w-100">Add</button></div>
+    </form>
+  </section>
+
+  <!-- Requests Section -->
+  <section id="requests" class="card">
+    <h2>🚨 Emergency Requests</h2>
+    <form id="requestForm" class="row g-2">
+      <div class="col-md-6"><input class="form-control" type="text" id="reqName" placeholder="Name" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="reqContact" placeholder="Contact" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="reqItem" placeholder="Required Item" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="reqCity" placeholder="City" required /></div>
+      <div class="col-12"><textarea class="form-control" id="reqNotes" placeholder="Notes"></textarea></div>
+      <div class="col-12"><button type="submit" class="btn btn-danger w-100">Submit Request</button></div>
+    </form>
+    <div id="requestList" class="mt-3"></div>
+  </section>
+
+  <!-- Data Section -->
+  <section id="data" class="card">
+    <h2>📂 Data Management</h2>
+    <button id="exportJson" class="btn btn-danger">Export JSON</button>
+    <button id="exportCsv" class="btn btn-danger">Export CSV</button>
+    <input type="file" id="importFile" class="form-control mt-2" />
+  </section>
+</main>
+
+<footer>🩸 Emergency Finder | Designed by <b>You</b></footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- App JS -->
+<script>
+const entries = [];
+const requests = [];
+
+// Add Entry
+document.getElementById("addForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const entry = {
+    name: name.value,
+    contact: contact.value,
+    item: item.value,
+    city: city.value,
+    notes: notes.value,
+    type: entryType.value
+  };
+  entries.push(entry);
+  alert("✅ Entry Added!");
+  e.target.reset();
+});
+
+// Search
+document.getElementById("searchForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const type = filterType.value;
+  const query = filterQuery.value.toLowerCase();
+  const city = filterCity.value.toLowerCase();
+  let results = entries.filter(en=>
+    (type==="all" || en.type===type) &&
+    (en.item.toLowerCase().includes(query)) &&
+    (city==="" || en.city.toLowerCase().includes(city))
+  );
+  resultsDiv.innerHTML = results.length? 
+    "<ul>"+results.map(r=>`<li>${r.type.toUpperCase()}: ${r.item} in ${r.city} (📞 ${r.contact})</li>`).join("")+"</ul>"
+    : "<p>No matches found.</p>";
+});
+
+// Requests
+document.getElementById("requestForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const req = {
+    name: reqName.value,
+    contact: reqContact.value,
+    item: reqItem.value,
+    city: reqCity.value,
+    notes: reqNotes.value
+  };
+  requests.push(req);
+  requestList.innerHTML += `<p>🚨 ${req.item} needed in ${req.city} by ${req.name} (📞 ${req.contact})</p>`;
+  e.target.reset();
+});
+</script>
+</body>
+</html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🩸 Emergency Finder</title>
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+    }
+    .navbar {
+      background: #b30000;
+    }
+    .navbar a {
+      color: #fff !important;
+    }
+    .navbar a:hover {
+      color: #000 !important;
+      background: #ff3333 !important;
+    }
+    .brand {
+      font-weight: bold;
+      color: #fff;
+    }
+    .card {
+      background: #1a1a1a;
+      color: #fff;
+      border: 2px solid #b30000;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(179,0,0,0.5);
+    }
+    .btn-danger {
+      background: #b30000;
+      border: none;
+    }
+    .btn-danger:hover {
+      background: #ff1a1a;
+    }
+    .form-control, .form-select, textarea {
+      background: #111;
+      border: 1px solid #b30000;
+      color: #fff;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      padding: 10px;
+      background: #b30000;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand brand">🩸 Emergency Finder</a>
+    <button class="navbar-toggler bg-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon bg-light"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#search">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="#add">Add</a></li>
+        <li class="nav-item"><a class="nav-link" href="#requests">Requests</a></li>
+        <li class="nav-item"><a class="nav-link" href="#data">Data</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container mt-4">
+  <!-- Search Section -->
+  <section id="search" class="card">
+    <h2>🔍 Search donors & medicines</h2>
+    <form id="searchForm" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Type</label>
+        <select id="filterType" class="form-select">
+          <option value="all">All</option>
+          <option value="blood">Blood</option>
+          <option value="medicine">Medicine</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Blood group / Medicine</label>
+        <input id="filterQuery" class="form-control" type="text" placeholder="e.g. O+, Paracetamol"/>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">City</label>
+        <input id="filterCity" class="form-control" type="text" placeholder="e.g. Pune"/>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button id="btnSearch" type="submit" class="btn btn-danger w-100">Search</button>
+      </div>
+    </form>
+    <div id="results" class="mt-3"></div>
+  </section>
+
+  <!-- Add Section -->
+  <section id="add" class="card">
+    <h2>➕ Add Donor / Medicine Provider</h2>
+    <form id="addForm" class="row g-2">
+      <div class="col-md-6"><input class="form-control" type="text" id="name" placeholder="Name" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="contact" placeholder="Contact" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="item" placeholder="Blood group or Medicine" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="city" placeholder="City" required /></div>
+      <div class="col-12"><textarea class="form-control" id="notes" placeholder="Notes"></textarea></div>
+      <div class="col-md-4">
+        <select id="entryType" class="form-select">
+          <option value="blood">Blood</option>
+          <option value="medicine">Medicine</option>
+        </select>
+      </div>
+      <div class="col-md-8"><button type="submit" class="btn btn-danger w-100">Add</button></div>
+    </form>
+  </section>
+
+  <!-- Requests Section -->
+  <section id="requests" class="card">
+    <h2>🚨 Emergency Requests</h2>
+    <form id="requestForm" class="row g-2">
+      <div class="col-md-6"><input class="form-control" type="text" id="reqName" placeholder="Name" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="reqContact" placeholder="Contact" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="reqItem" placeholder="Required Item" required /></div>
+      <div class="col-md-6"><input class="form-control" type="text" id="reqCity" placeholder="City" required /></div>
+      <div class="col-12"><textarea class="form-control" id="reqNotes" placeholder="Notes"></textarea></div>
+      <div class="col-12"><button type="submit" class="btn btn-danger w-100">Submit Request</button></div>
+    </form>
+    <div id="requestList" class="mt-3"></div>
+  </section>
+
+  <!-- Data Section -->
+  <section id="data" class="card">
+    <h2>📂 Data Management</h2>
+    <button id="exportJson" class="btn btn-danger">Export JSON</button>
+    <button id="exportCsv" class="btn btn-danger">Export CSV</button>
+    <input type="file" id="importFile" class="form-control mt-2" />
+  </section>
+</main>
+
+<footer>🩸 Emergency Finder | Designed by <b>You</b></footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- App JS -->
+<script>
+const entries = [];
+const requests = [];
+
+// Add Entry
+document.getElementById("addForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const entry = {
+    name: name.value,
+    contact: contact.value,
+    item: item.value,
+    city: city.value,
+    notes: notes.value,
+    type: entryType.value
+  };
+  entries.push(entry);
+  alert("✅ Entry Added!");
+  e.target.reset();
+});
+
+// Search
+document.getElementById("searchForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const type = filterType.value;
+  const query = filterQuery.value.toLowerCase();
+  const city = filterCity.value.toLowerCase();
+  let results = entries.filter(en=>
+    (type==="all" || en.type===type) &&
+    (en.item.toLowerCase().includes(query)) &&
+    (city==="" || en.city.toLowerCase().includes(city))
+  );
+  resultsDiv.innerHTML = results.length? 
+    "<ul>"+results.map(r=>`<li>${r.type.toUpperCase()}: ${r.item} in ${r.city} (📞 ${r.contact})</li>`).join("")+"</ul>"
+    : "<p>No matches found.</p>";
+});
+
+// Requests
+document.getElementById("requestForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const req = {
+    name: reqName.value,
+    contact: reqContact.value,
+    item: reqItem.value,
+    city: reqCity.value,
+    notes: reqNotes.value
+  };
+  requests.push(req);
+  requestList.innerHTML += `<p>🚨 ${req.item} needed in ${req.city} by ${req.name} (📞 ${req.contact})</p>`;
+  e.target.reset();
+});
+</script>
+</body>
+</html>
